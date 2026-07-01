@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="Track your savings with ease">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%233b82f6' width='192' height='192'/><circle cx='96' cy='96' r='60' fill='%2310b981'/><text x='96' y='120' font-size='80' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>S</text></svg>">
+    <title>Savings Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #ffffff;
+            color: #e2e8f0;
+        }
+
+        .card {
+            width: min(420px, 100%);
+            padding: 24px;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.82));
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45);
+            display: flex;
+            flex-direction: column;
+            min-height: 620px;
+        }
+
+        .header {
+            display: flex;
+            align-items: start;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .title-area {
+            flex: 1;
+            padding-top: 2px;
+        }
+
+        .settings-button {
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            align-self: center;
+            position: relative;
+            top: -4px;
+            padding: 0;
+            line-height: 1;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            background: rgba(30, 41, 59, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            color: #94a3b8;
+        }
+
+        .logo {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            font-size: 28px;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            box-shadow: 0 8px 22px rgba(59, 130, 246, 0.35);
+        }
+
+        .title-area {
+            flex: 1;
+        }
+
+        .title-area h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .tagline {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .summary {
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(30, 41, 59, 0.72);
+            border: 2px solid #fb923c;
+            height: 94px;
+            min-height: 94px;
+            margin-bottom: 0;
+            box-sizing: border-box;
+            box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.18), 0 6px 18px rgba(15, 23, 42, 0.18);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .summary-label {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: normal;
+            color: #f8fafc;
+        }
+
+        .summary-value {
+            margin-top: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .pots {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 0;
+        }
+
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .pot {
+            padding: 12px 14px;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.52));
+            border: 2px solid #fb923c;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 6px 18px rgba(15, 23, 42, 0.18);
+        }
+
+        .pot:first-child {
+            border-color: #fb923c;
+            outline: none;
+            height: 94px;
+            min-height: 94px;
+            justify-content: space-between;
+        }
+
+        .pot:first-child.target-enabled {
+            height: auto;
+            min-height: 130px;
+            justify-content: flex-start;
+            gap: 8px;
+        }
+
+        .pot:last-child {
+            border-color: #fb923c;
+            outline: none;
+            height: 94px;
+            min-height: 94px;
+            justify-content: space-between;
+        }
+
+        .pot-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .pot-header h2 {
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .pot-balance {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 4px 0 0;
+        }
+
+        .action-bar {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+            margin-bottom: 0;
+        }
+
+        button {
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            background: #2563eb;
+            color: #eff6ff;
+        }
+
+        .button-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .button-secondary {
+            background: #334155;
+            color: #f8fafc;
+        }
+
+        .button-secondary:hover {
+            background: #475569;
+        }
+
+        .button-ghost {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        .button-ghost:hover {
+            background: #334155;
+        }
+
+        .button-danger {
+            background: #991b1b;
+            color: #fee2e2;
+        }
+
+        .button-danger:hover {
+            background: #b91c1c;
+        }
+
+        .button-success {
+            background: #047857;
+            color: #ecfdf5;
+        }
+
+        .button-success:hover {
+            background: #059669;
+        }
+
+        .transfer-panel {
+            margin-top: 8px;
+            padding: 14px;
+            background: rgba(30, 41, 59, 0.55);
+            border-radius: 18px;
+            border: 1px solid rgba(51, 65, 85, 0.6);
+        }
+
+        .transfer-panel h3 {
+            margin: 0 0 12px;
+            font-size: 16px;
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #f8fafc;
+            font-size: 14px;
+        }
+
+        .small-note {
+            margin: 12px 0 0;
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .pot-target {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(100, 116, 139, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            transition: width 0.3s ease;
+        }
+
+        .pot-content {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .pot:first-child.target-enabled .pot-content {
+            justify-content: space-between;
+            flex: 1;
+        }
+
+        .pot:first-child:not(.target-enabled) .pot-content {
+            justify-content: flex-start;
+            flex: none;
+        }
+
+        .pot-amount-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pot:first-child.target-enabled .pot-amount-section {
+            flex: 1;
+            justify-content: space-between;
+        }
+
+        .pot:first-child:not(.target-enabled) .pot-amount-section {
+            flex: none;
+            justify-content: center;
+        }
+
+        .pot-pie-chart {
+            width: 75px;
+            height: 75px;
+            flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: -20px;
+        }
+
+        .pot-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .pot:first-child:not(.target-enabled) .pot-bottom {
+            display: none;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: transparent;
+            display: grid;
+            place-items: center;
+            z-index: 50;
+        }
+
+        .modal {
+            width: min(360px, calc(100vw - 48px));
+            background: #111827;
+            border: 5px solid rgba(148, 163, 184, 0.6);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.55);
+        }
+
+        .modal h3 {
+            margin: 0 0 14px;
+            font-size: 20px;
+        }
+
+        .dialog-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 420px) {
+            .card {
+                padding: 18px;
+            }
+
+            .button-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="card" aria-label="Savings tracker dashboard">
+        <section class="header" aria-label="Savings tracker header">
+            <div class="logo" aria-hidden="true">S</div>
+            <div class="title-area">
+                <h1>Savings</h1>
+                <p class="tagline">Track your savings with ease</p>
+            </div>
+            <button id="settingsButton" class="settings-button" type="button" aria-label="Edit balances">⚙️</button>
+        </section>
+
+        <section class="card-content">
+            <section class="summary" aria-label="Total savings summary">
+                <span class="summary-label">Total Savings</span>
+                <div class="summary-value">£<span id="total">0.00</span></div>
+            </section>
+
+            <section class="pots" aria-label="Savings pots">
+                <article class="pot" aria-label="Active Savings pot">
+                    <div class="pot-header">
+                        <h2>Active Savings</h2>
+                    </div>
+                    <div class="pot-content">
+                        <div class="pot-amount-section">
+                            <div class="pot-balance">£<span id="active">0.00</span></div>
+                            <div id="targetInfo" class="pot-target hidden"></div>
+                        </div>
+                        <svg id="pieChart" class="pot-pie-chart hidden" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(100, 116, 139, 0.3)" stroke-width="4"></circle>
+                            <circle id="pieFill" cx="30" cy="30" r="24" fill="none" stroke="url(#pieGradient)" stroke-width="4" stroke-dasharray="0 150.8" stroke-linecap="round" transform="rotate(-90 30 30)"></circle>
+                            <defs>
+                                <linearGradient id="pieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="pot-bottom">
+                        <div id="progressBar" class="progress-bar hidden">
+                            <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="pot" aria-label="Reserve Fund pot">
+                    <div class="pot-header">
+                        <h2>Reserve Fund</h2>
+                    </div>
+                    <div class="pot-balance">£<span id="reserve">0.00</span></div>
+                </article>
+            </section>
+        </section>
+
+        <section class="action-bar" aria-label="Savings actions">
+            <button id="addFunds" class="button-success" type="button">Add</button>
+            <button id="spendFunds" class="button-danger" type="button">Spend</button>
+            <button id="transferFunds" class="button-primary" type="button">Transfer</button>
+        </section>
+
+        <p class="small-note">Balances are saved automatically on this device.</p>
+    </main>
+
+    <div id="actionModal" class="modal-backdrop hidden" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <h3 id="modalTitle">Action</h3>
+
+            <div id="potField" class="field">
+                <label for="modalPot">Pot</label>
+                <select id="modalPot">
+                    <option value="active">Active Savings</option>
+                    <option value="reserve">Reserve Fund</option>
+                </select>
+            </div>
+
+            <div id="fromField" class="field hidden">
+                <label for="modalFrom">From</label>
+                <select id="modalFrom">
+                    <option value="active">Active Savings</option>
+                    <option value="reserve">Reserve Fund</option>
+                </select>
+            </div>
+
+            <div id="toField" class="field hidden">
+                <label for="modalTo">To</label>
+                <select id="modalTo">
+                    <option value="active">Active Savings</option>
+                    <option value="reserve">Reserve Fund</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="modalAmount">Amount</label>
+                <input id="modalAmount" type="number" min="0.01" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="dialog-actions">
+                <button id="modalCancel" class="button-ghost" type="button">Cancel</button>
+                <button id="modalConfirm" class="button-primary" type="button">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal-backdrop hidden" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <h3 id="settingsTitle">Edit balances</h3>
+
+            <div class="field">
+                <label for="activeBalanceInput">Active Savings</label>
+                <input id="activeBalanceInput" type="number" min="0.00" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="field">
+                <label for="reserveBalanceInput">Reserve Fund</label>
+                <input id="reserveBalanceInput" type="number" min="0.00" step="0.01" placeholder="0.00">
+            </div>
+
+            <div class="field" style="display: flex; align-items: center; gap: 8px;">
+                <input id="enableTarget" type="checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                <label for="enableTarget" style="margin: 0; flex: 1; cursor: pointer;">Set savings target for Active Savings</label>
+            </div>
+
+            <div class="field">
+                <label for="targetAmount">Target Amount</label>
+                <input id="targetAmount" type="number" min="0.00" step="0.01" placeholder="0.00" disabled>
+            </div>
+
+            <div class="dialog-actions">
+                <button id="settingsCancel" class="button-ghost" type="button">Cancel</button>
+                <button id="settingsSave" class="button-primary" type="button">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'savings-tracker-state';
+
+        const state = {
+            activeSavings: 718.06,
+            reserveFund: 4000.00,
+            targetEnabled: false,
+            targetAmount: 2000.00
+        };
+
+        const storedState = localStorage.getItem(STORAGE_KEY);
+        if (storedState) {
+            try {
+                const parsed = JSON.parse(storedState);
+                if (typeof parsed.activeSavings === 'number' && typeof parsed.reserveFund === 'number') {
+                    state.activeSavings = parsed.activeSavings;
+                    state.reserveFund = parsed.reserveFund;
+                    if (typeof parsed.targetEnabled === 'boolean') {
+                        state.targetEnabled = parsed.targetEnabled;
+                    }
+                    if (typeof parsed.targetAmount === 'number') {
+                        state.targetAmount = parsed.targetAmount;
+                    }
+                }
+            } catch (error) {
+                console.warn('Unable to read saved balances, using defaults.', error);
+            }
+        }
+
+        const activeEl = document.getElementById('active');
+        const reserveEl = document.getElementById('reserve');
+        const totalEl = document.getElementById('total');
+        const modal = document.getElementById('actionModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const potField = document.getElementById('potField');
+        const fromField = document.getElementById('fromField');
+        const toField = document.getElementById('toField');
+        const modalPot = document.getElementById('modalPot');
+        const modalFrom = document.getElementById('modalFrom');
+        const modalTo = document.getElementById('modalTo');
+        const modalAmount = document.getElementById('modalAmount');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsModal = document.getElementById('settingsModal');
+        const activeBalanceInput = document.getElementById('activeBalanceInput');
+        const reserveBalanceInput = document.getElementById('reserveBalanceInput');
+        const settingsCancel = document.getElementById('settingsCancel');
+        const settingsSave = document.getElementById('settingsSave');
+        const enableTarget = document.getElementById('enableTarget');
+        const targetAmount = document.getElementById('targetAmount');
+        const targetInfo = document.getElementById('targetInfo');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const pieChart = document.getElementById('pieChart');
+        const pieFill = document.getElementById('pieFill');
+        const activePot = document.querySelector('article[aria-label="Active Savings pot"]');
+
+        let pendingAction = null;
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function updateScreen() {
+            activeEl.textContent = state.activeSavings.toFixed(2);
+            reserveEl.textContent = state.reserveFund.toFixed(2);
+            totalEl.textContent = (state.activeSavings + state.reserveFund).toFixed(2);
+            
+            // Update target display
+            if (state.targetEnabled && state.targetAmount > 0) {
+                const remaining = Math.max(0, state.targetAmount - state.activeSavings);
+                const progressPercent = Math.min(100, (state.activeSavings / state.targetAmount) * 100);
+                
+                activePot.classList.add('target-enabled');
+                progressBar.classList.remove('hidden');
+                progressFill.style.width = progressPercent + '%';
+                
+                pieChart.classList.remove('hidden');
+                const circumference = 2 * Math.PI * 24;
+                const dashLength = (progressPercent / 100) * circumference;
+                pieFill.setAttribute('stroke-dasharray', `${dashLength} ${circumference}`);
+                
+                if (remaining > 0) {
+                    targetInfo.textContent = `£${remaining.toFixed(2)} to £${state.targetAmount.toFixed(2)}`;
+                    targetInfo.classList.remove('hidden');
+                } else {
+                    targetInfo.textContent = '✓ Goal reached!';
+                    targetInfo.classList.remove('hidden');
+                }
+            } else {
+                activePot.classList.remove('target-enabled');
+                progressBar.classList.add('hidden');
+                targetInfo.classList.add('hidden');
+                pieChart.classList.add('hidden');
+            }
+            
+            saveState();
+        }
+
+        function parseAmount(value) {
+            const amount = Number(value);
+            if (!Number.isFinite(amount) || amount <= 0) {
+                return null;
+            }
+
+            return amount;
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            pendingAction = null;
+        }
+
+        function closeSettingsModal() {
+            settingsModal.classList.add('hidden');
+            settingsModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function openBalanceEditor() {
+            activeBalanceInput.value = activeEl.textContent.trim();
+            reserveBalanceInput.value = reserveEl.textContent.trim();
+            enableTarget.checked = state.targetEnabled;
+            targetAmount.value = state.targetAmount.toFixed(2);
+            targetAmount.disabled = !state.targetEnabled;
+            settingsModal.classList.remove('hidden');
+            settingsModal.setAttribute('aria-hidden', 'false');
+            activeBalanceInput.focus();
+        }
+
+        function openModal(action) {
+            pendingAction = action;
+            modalTitle.textContent = action.title;
+            modalAmount.value = '';
+
+            if (action.type === 'transfer') {
+                potField.classList.add('hidden');
+                fromField.classList.remove('hidden');
+                toField.classList.remove('hidden');
+                modalFrom.value = 'reserve';
+                modalTo.value = 'active';
+            } else {
+                potField.classList.remove('hidden');
+                fromField.classList.add('hidden');
+                toField.classList.add('hidden');
+                modalPot.value = action.type === 'add' ? 'reserve' : 'active';
+            }
+
+            modalConfirm.textContent = action.confirm;
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            modalAmount.focus();
+        }
+
+        function transferFunds(from, to, amount) {
+            if (from === to) {
+                alert('Choose two different pots to transfer between.');
+                return;
+            }
+
+            if (amount <= 0 || !Number.isFinite(amount)) {
+                alert('Please enter a valid amount greater than zero.');
+                return;
+            }
+
+            if (from === 'active' && amount > state.activeSavings) {
+                alert('Not enough money in Active Savings.');
+                return;
+            }
+
+            if (from === 'reserve' && amount > state.reserveFund) {
+                alert('Not enough money in the Reserve Fund.');
+                return;
+            }
+
+            if (from === 'active') {
+                state.activeSavings -= amount;
+            } else {
+                state.reserveFund -= amount;
+            }
+
+            if (to === 'active') {
+                state.activeSavings += amount;
+            } else {
+                state.reserveFund += amount;
+            }
+
+            updateScreen();
+        }
+
+        function addFunds() {
+            openModal({ type: 'add', title: 'Add money', confirm: 'Add' });
+        }
+
+        function spendFunds() {
+            openModal({ type: 'spend', title: 'Spend money', confirm: 'Spend' });
+        }
+
+        function transferFundsPrompt() {
+            openModal({ type: 'transfer', title: 'Transfer money', confirm: 'Transfer' });
+        }
+
+        function confirmAction() {
+            const amount = parseAmount(modalAmount.value);
+            if (amount === null) {
+                alert('Please enter a valid amount greater than zero.');
+                return;
+            }
+
+            if (pendingAction === null) {
+                return;
+            }
+
+            if (pendingAction.type === 'add') {
+                const pot = modalPot.value;
+                if (pot === 'active') {
+                    state.activeSavings += amount;
+                } else {
+                    state.reserveFund += amount;
+                }
+            } else if (pendingAction.type === 'spend') {
+                const pot = modalPot.value;
+                if (pot === 'active') {
+                    if (amount > state.activeSavings) {
+                        alert('Not enough money in Active Savings.');
+                        return;
+                    }
+                    state.activeSavings -= amount;
+                } else {
+                    if (amount > state.reserveFund) {
+                        alert('Not enough money in the Reserve Fund.');
+                        return;
+                    }
+                    state.reserveFund -= amount;
+                }
+            } else if (pendingAction.type === 'transfer') {
+                transferFunds(modalFrom.value, modalTo.value, amount);
+            }
+
+            closeModal();
+            updateScreen();
+        }
+
+        document.getElementById('addFunds').addEventListener('click', addFunds);
+        document.getElementById('spendFunds').addEventListener('click', spendFunds);
+        document.getElementById('transferFunds').addEventListener('click', transferFundsPrompt);
+        settingsButton.addEventListener('click', openBalanceEditor);
+        settingsCancel.addEventListener('click', closeSettingsModal);
+        enableTarget.addEventListener('change', () => {
+            targetAmount.disabled = !enableTarget.checked;
+        });
+        settingsSave.addEventListener('click', () => {
+            const newActive = Number(activeBalanceInput.value);
+            const newReserve = Number(reserveBalanceInput.value);
+            const newTarget = Number(targetAmount.value);
+
+            if (!Number.isFinite(newActive) || !Number.isFinite(newReserve) || newActive < 0 || newReserve < 0) {
+                alert('Please enter valid non-negative numbers.');
+                return;
+            }
+
+            if (enableTarget.checked && (!Number.isFinite(newTarget) || newTarget <= 0)) {
+                alert('Please enter a valid target amount greater than zero.');
+                return;
+            }
+
+            state.activeSavings = newActive;
+            state.reserveFund = newReserve;
+            state.targetEnabled = enableTarget.checked;
+            state.targetAmount = newTarget;
+            closeSettingsModal();
+            updateScreen();
+        });
+        modalCancel.addEventListener('click', closeModal);
+        modalConfirm.addEventListener('click', confirmAction);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        settingsModal.addEventListener('click', (event) => {
+            if (event.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+
+        updateScreen();
+    </script>
+
+    <script>
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js').then(registration => {
+                console.log('Service Worker registered:', registration);
+            }).catch(error => {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+    </script>
+</body>
+</html>
