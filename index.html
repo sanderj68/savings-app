@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#3b82f6">
     <meta name="description" content="Track your savings with ease">
     <link rel="manifest" href="./manifest.json">
@@ -15,25 +15,28 @@
 
         body {
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
             display: grid;
             place-items: center;
-            padding: 24px;
+            padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
             font-family: "Segoe UI", Arial, sans-serif;
             background: #ffffff;
             color: #e2e8f0;
+            overflow: hidden;
         }
 
         .card {
             width: min(420px, 100%);
-            padding: 24px;
+            height: 100%;
+            padding: 20px;
             border-radius: 28px;
             background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.82));
             border: 1px solid rgba(148, 163, 184, 0.2);
             box-shadow: 0 24px 60px rgba(15, 23, 42, 0.45);
             display: flex;
             flex-direction: column;
-            min-height: 620px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .header {
@@ -405,13 +408,47 @@
             display: none !important;
         }
 
-        @media (max-width: 420px) {
+        @media (max-width: 480px) {
             .card {
-                padding: 18px;
+                padding: 16px;
+                border-radius: 20px;
+            }
+            
+            .title-area h1 {
+                font-size: 28px;
+            }
+            
+            .logo {
+                width: 52px;
+                height: 52px;
+                font-size: 24px;
+            }
+            
+            .summary {
+                height: 80px;
+                min-height: 80px;
+            }
+            
+            .pot {
+                padding: 10px 12px;
             }
 
             .button-row {
                 grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-height: 700px) {
+            .card {
+                border-radius: 16px;
+            }
+            
+            .header {
+                margin-bottom: 16px;
+            }
+            
+            .card-content {
+                gap: 12px;
             }
         }
     </style>
